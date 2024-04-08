@@ -1,0 +1,78 @@
+import datetime
+from kivy.app import App
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.button import Button
+from kivy.uix.label import Label
+from kivy.uix.popup import Popup
+from kivy.uix.textinput import TextInput
+
+class Task:
+def init (self, description, priority, due_date):
+self.description = description
+self.priority = priority
+self.due_date = due_date
+self.completed = False
+
+class ToDoListApp(App):
+def init (self, **kwargs):
+super(ToDoListApp, self). init (**kwargs)
+self.tasks = []
+def build(self):
+self.layout = BoxLayout(orientation='vertical')
+self.description_input = TextInput(hint_text='Enter task description')
+self.priority_input = TextInput(hint_text='Enter priority (1 - Low, 2 - Medium, 3 -High)')
+self.due_date_input = TextInput(hint_text='Enter due date (YYYY-MM-DD)')
+add_task_button = Button(text='Add Task')
+add_task_button.bind(on_press=self.add_task)
+self.task_list_layout = BoxLayout(orientation='vertical')
+self.layout.add_widget(self.description_input)
+self.layout.add_widget(self.priority_input)
+self.layout.add_widget(self.due_date_input)
+self.layout.add_widget(add_task_button)
+self.layout.add_widget(self.task_list_layout)
+return self.layout
+def add_task(self, instance):
+description = self.description_input.text
+priority = self.priority_input.text
+due_date = self.due_date_input.text
+if description.strip() == '' or priority.strip() == '' or due_date.strip() == '':
+self.show_error_popup('Error', 'All fields are required.')
+return
+
+priority = int(priority)
+if priority < 1 or priority > 3:
+self.show_error_popup('Error', 'Priority must be between 1 and 3.')
+return
+
+try:
+due_date = datetime.datetime.strptime(due_date, '%Y-%m-%d').date()
+except ValueError:
+self.show_error_popup('Error', 'Invalid due date format. Use YYYY-MM-DD.')
+return
+task = Task(description, priority, due_date)
+self.tasks.append(task)
+task_layout = BoxLayout(orientation='horizontal')
+task_label = Label(text=task.description)
+completed_button = Button(text='Completed')
+completed_button.bind(on_press=lambda x, task=task:self.show_completion_message(task))
+task_layout.add_widget(task_label)
+task_layout.add_widget(completed_button)
+self.task_list_layout.add_widget(task_layout)
+self.clear_input_fields()
+defshow_completion_message(self, task):
+task.completed = True
+task_layout = self.task_list_layout.children[self.tasks.index(task)]
+task_layout.remove_widget(task_layout.children[1]) # Remove the completed button
+task_layout.add_widget(Label(text='Task completed!', color=(0, 1, 0, 1)))
+def clear_input_fields(self):
+self.description_input.text = ''
+self.priority_input.text = ''
+
+self.due_date_input.text = ''
+def show_error_popup(self, title, message):
+popup = Popup(title=title, content=Label(text=message), size_hint=(None, None),
+size=(300, 200))
+popup.open()
+
+if name == ' main ':
+ToDoListApp().run()
