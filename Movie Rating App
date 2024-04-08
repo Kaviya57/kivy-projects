@@ -1,0 +1,57 @@
+from kivy.app import App
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.gridlayout import GridLayout
+from kivy.uix.label import Label
+from kivy.uix.button import Button
+from kivy.uix.textinput import TextInput
+from kivy.uix.scrollview import ScrollView
+
+class MovieRatingApp(App):
+def build(self):
+self.movies = {}
+
+layout = BoxLayout(orientation='vertical')
+scroll_view = ScrollView()
+self.movies_layout = GridLayout(cols=1, spacing=10, size_hint_y=None)
+self.movies_layout.bind(minimum_height=self.movies_layout.setter('height'))
+scroll_view.add_widget(self.movies_layout)
+
+add_layout = GridLayout(cols=3, spacing=10, size_hint_y=None, height=100)
+self.movie_input = TextInput(hint_text='Enter movie name')
+self.rating_input = TextInput(hint_text='Enter rating (1-5)')
+add_button = Button(text='Add Movie')
+add_button.bind(on_press=self.add_movie)
+
+add_layout.add_widget(self.movie_input)
+add_layout.add_widget(self.rating_input)
+add_layout.add_widget(add_button)
+
+layout.add_widget(add_layout)
+layout.add_widget(scroll_view)
+
+return layout
+
+def add_movie(self, instance):
+movie_name = self.movie_input.text
+rating = self.rating_input.text
+if movie_name and rating:
+rating = int(rating)
+if rating < 1 or rating > 5:
+self.rating_input.text = ''
+return
+self.movies[movie_name] = rating
+self.update_movies_layout()
+self.movie_input.text = ''
+self.rating_input.text = ''
+
+def update_movies_layout(self):
+self.movies_layout.clear_widgets()
+self.movies_layout.add_widget(Label(text='')) # Add an empty label for spacing
+
+for movie, rating in self.movies.items():
+movie_label = Label(text=f'Movie: {movie} | Rating: {rating}')
+self.movies_layout.add_widget(movie_label)
+self.movies_layout.add_widget(Label(text='')) # Add an empty label for spacing
+
+if __name__ == '__main__':
+MovieRatingApp().run()
