@@ -1,0 +1,39 @@
+from kivy.app import App
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.label import Label
+from kivy.graphics import Color, Rectangle
+
+class ColorChangerApp(App):
+def build(self):
+# Set up the layout
+layout = BoxLayout(orientation='vertical', spacing=10, padding=10)
+
+# Create Label with initial text
+self.label = Label(text='Hello World', font_size=20, size_hint=(1, 0.8))
+self.label.bind(on_touch_down=self.on_label_click)
+layout.add_widget(self.label)
+return layout
+
+def on_label_click(self, instance, touch):
+# Check if the touch is inside the label
+if instance.collide_point(*touch.pos):
+self.change_colors()
+
+def change_colors(self, *args):
+# Change text color
+self.label.color = self.get_random_color()
+
+# Change font color
+self.label.text_color = self.get_random_color()
+
+# Change background color
+with self.label.canvas.before:
+Color(*self.get_random_color())
+Rectangle(pos=self.label.pos, size=self.label.size)
+
+def get_random_color(self):
+import random
+return random.random(), random.random(), random.random(), 1
+
+if __name__ == '__main__':
+ColorChangerApp().run()
