@@ -1,1 +1,20 @@
-
+<!DOCTYPE html>
+<html>
+<head>
+<title>Push Notification</title>
+<script type="text/javascript"
+src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.js"></script>
+<script type="text/javascript" charset="utf-8">
+var socket = io.connect('http://' + document.domain + ':' + location.port + '/test');
+socket.on('connect', function() {
+socket.emit('my_event', {data: 'I\'m connected!'});+
+});
+socket.on('welcome', function(data) {
+console.log(data.data);
+});
+</script>
+</head>
+<body>
+<h1>Welcome to Push Notification</h1>
+</body>
+</html>
