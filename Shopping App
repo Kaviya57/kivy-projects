@@ -1,0 +1,102 @@
+from kivy.app import App
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.label import Label
+from kivy.uix.button import Button
+from kivy.uix.screenmanager import ScreenManager, Screen
+from kivy.uix.widget import Widget
+class Product:
+def __init__(self, name, cost):
+self.name = name
+self.cost = cost
+class ShoppingCart:
+def __init__(self):
+self.items = []
+def add_item(self, product):
+self.items.append(product)
+def remove_item(self, product):
+self.items.remove(product)
+def get_total_cost(self):
+return sum([item.cost for item in self.items])
+class ShoppingApp(App):
+def build(self):
+self.cart = ShoppingCart()
+# Screen manager
+self.sm = ScreenManager()
+# Home screen
+self.home_screen = Screen(name='home')
+self.home_screen.add_widget(self.create_product_list())
+self.sm.add_widget(self.home_screen)
+# Cart screen
+self.cart_screen = Screen(name='cart')
+self.cart_screen.add_widget(self.create_cart_layout())
+self.sm.add_widget(self.cart_screen)
+# Set background color
+self.root_widget = Widget()
+self.root_widget.canvas.add(Color(0.2, 0.7, 0.3))
+self.root_widget.canvas.add(Rectangle(size=self.root.size, pos=self.root.pos))
+self.root_widget.add_widget(self.sm)
+return self.root_widget
+def create_product_list(self):
+layout = BoxLayout(orientation='vertical')
+layout.add_widget(Label(text='Products', size_hint_y=None, height=50))
+products = [
+Product("Shoes", 400),
+Product("Watch", 250),
+Product("Bags", 200),
+Product("Medicine", 350),
+Product("Slippers", 500)
+]
+for product in products:
+item_layout = BoxLayout(orientation='horizontal')
+item_layout.add_widget(Label(text=product.name))
+item_layout.add_widget(Label(text=f"₹ {product.cost}"))
+add_button = Button(text='Add to Cart')
+add_button.bind(on_press=lambda btn, prod=product: self.add_to_cart(prod))
+item_layout.add_widget(add_button)
+layout.add_widget(item_layout)
+return layout
+def create_cart_layout(self):
+layout = BoxLayout(orientation='vertical')
+layout.add_widget(Label(text='Cart', size_hint_y=None, height=50))
+for item in self.cart.items:
+item_layout = BoxLayout(orientation='horizontal')
+item_layout.add_widget(Label(text=item.name))
+item_layout.add_widget(Label(text=f"₹ {item.cost}"))
+remove_button = Button(text='Remove')
+remove_button.bind(on_press=lambda btn, prod=item: self.remove_from_cart(prod))
+item_layout.add_widget(remove_button)
+layout.add_widget(item_layout)
+total_label = Label(text='Total Cost: ₹ ' + str(self.cart.get_total_cost()), size_hint_y=None, height=50)
+layout.add_widget(total_label)
+# Add a payment button
+payment_button = Button(text='Pay Now', size_hint_y=None, height=50)
+payment_button.bind(on_press=self.pay_now)
+layout.add_widget(payment_button)
+# Add a back button
+back_button = Button(text='Back to Products', size_hint_y=None, height=50)
+back_button.bind(on_press=self.go_to_products)
+layout.add_widget(back_button)
+return layout
+def add_to_cart(self, product):
+self.cart.add_item(product)
+self.cart_screen.clear_widgets()
+self.cart_screen.add_widget(self.create_cart_layout())
+self.sm.current = 'cart'
+def remove_from_cart(self, product):
+self.cart.remove_item(product)
+self.cart_screen.clear_widgets()
+self.cart_screen.add_widget(self.create_cart_layout())
+self.sm.current = 'cart'
+def go_to_products(self, instance):
+self.sm.current = 'home'
+def pay_now(self, instance):
+# Add payment logic here
+total_cost = self.cart.get_total_cost()
+print(f"Payment successful. Total amount: ₹ {total_cost}")
+# Clear the cart and update the UI
+self.cart.items = []
+self.cart_screen.clear_widgets()
+self.cart_screen.add_widget(self.create_cart_layout())
+self.sm.current = 'home'
+if __name__ == '__main__':
+ShoppingApp().run()
