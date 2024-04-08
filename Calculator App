@@ -1,0 +1,59 @@
+from kivy.app import App
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.gridlayout import GridLayout
+from kivy.uix.button import Button
+from kivy.uix.textinput import TextInput
+
+class CalculatorApp(App):
+def build(self):
+self.operators = ['+', '-', '*', '/']
+self.last_was_operator = None
+self.last_button = None
+# Create the main layout
+layout = BoxLayout(orientation='vertical', spacing=10, padding=10)
+# Create the input field
+self.result_input = TextInput(font_size=32, halign='right', multiline=False, readonly=True)
+layout.add_widget(self.result_input)
+# Create the button grid layout
+button_grid = GridLayout(cols=4, spacing=5)
+# Define button labels
+buttons = [
+'7', '8', '9', '/',
+'4', '5', '6', '*',
+'1', '2', '3', '-',
+'C', '0', '=', '+'
+]
+for button_label in buttons:
+button = Button(text=button_label, on_press=self.on_button_press)
+button_grid.add_widget(button)
+layout.add_widget(button_grid)
+return layout
+def on_button_press(self, instance):
+current_text = self.result_input.text
+button_text = instance.text
+if button_text == 'C':
+# Clear the input field
+self.result_input.text = ''
+self.last_was_operator = None
+self.last_button = None
+elif button_text == '=':
+# Evaluate the expression
+try:
+result = str(eval(current_text))
+self.result_input.text = result
+except Exception as e:
+self.result_input.text = 'Error'
+else:
+if self.last_was_operator and button_text in self.operators:
+# Replace the last operator
+current_text = current_text[:-1]
+elif self.last_button and self.last_button.text in self.operators and button_text in self.operators:
+# Replace the last operator if two consecutive operators are pressed
+current_text = current_text[:-1]
+# Update the input field
+self.result_input.text = current_text + button_text
+self.last_was_operator = button_text in self.operators
+self.last_button = instance
+
+if __name__ == '__main__':
+CalculatorApp().run()
